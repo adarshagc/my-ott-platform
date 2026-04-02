@@ -3,30 +3,32 @@
 <head>
     <title>My OTT Platform</title>
     <style>
-        body { background: #141414; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
-        h1 { color: #E50914; margin-left: 20px; }
-        .video-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
-        .video-card { background: #1f1f1f; width: 320px; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
-        video { width: 100%; border-radius: 5px; margin-bottom: 10px; background: black; }
-        .title { font-size: 14px; font-weight: bold; color: #ccc; }
+        body { background: #141414; color: white; font-family: Arial; padding: 20px; }
+        h1 { color: #E50914; }
+        .video-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .video-card { background: #1f1f1f; width: 300px; padding: 10px; border-radius: 8px; }
+        video { width: 100%; border-radius: 4px; }
     </style>
 </head>
 <body>
     <h1>My Private Netflix</h1>
-    <div class="video-grid" id="movie-list">
-        <div class="video-card">
-            <video controls>
-                <source src="500 Days of Summer.mp4" type="video/mp4">
-            </video>
-            <div class="title">500 Days of Summer</div>
-        </div>
-        
-        <div class="video-card">
-            <video controls>
-                <source src="Kirik Party (2016).mp4" type="video/mp4">
-            </video>
-            <div class="title">Kirik Party (2016)</div>
-        </div>
-    </div>
+    <div class="video-grid" id="movie-list">Loading movies...</div>
+
+    <script>
+        // This script asks the server for the list of movies
+        fetch('/api/movies')
+            .then(res => res.json())
+            .then(movies => {
+                const container = document.getElementById('movie-list');
+                container.innerHTML = ''; // Clear the "Loading" text
+                movies.forEach(movie => {
+                    container.innerHTML += `
+                        <div class="video-card">
+                            <video controls><source src="${movie}" type="video/mp4"></video>
+                            <p>${movie.replace('.mp4', '')}</p>
+                        </div>`;
+                });
+            });
+    </script>
 </body>
 </html>
