@@ -3,20 +3,29 @@
 <head>
     <title>My OTT Platform</title>
     <style>
-        body { background: #141414; color: white; font-family: Arial; }
-        .container { padding: 50px; }
-        .video-card { display: inline-block; margin: 10px; background: #333; padding: 10px; border-radius: 8px; }
-        video { width: 400px; border-radius: 5px; }
+        body { background: #141414; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        h1 { color: #E50914; margin-left: 20px; }
+        .video-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .video-card { background: #1f1f1f; width: 320px; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
+        video { width: 100%; border-radius: 5px; margin-bottom: 10px; background: black; }
+        .title { font-size: 14px; font-weight: bold; color: #ccc; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>My Private Netflix</h1>
+    <h1>My Private Netflix</h1>
+    <div class="video-grid" id="movie-list">
         <div class="video-card">
-            <h3>Now Playing: 500 Days of Summer</h3>
             <video controls>
                 <source src="500 Days of Summer.mp4" type="video/mp4">
             </video>
+            <div class="title">500 Days of Summer</div>
+        </div>
+        
+        <div class="video-card">
+            <video controls>
+                <source src="Kirik Party (2016).mp4" type="video/mp4">
+            </video>
+            <div class="title">Kirik Party (2016)</div>
         </div>
     </div>
 </body>
