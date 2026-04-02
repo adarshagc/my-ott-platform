@@ -2,15 +2,32 @@ import http.server
 import socketserver
 import os
 
-# This tells Python to look inside your assets/videos folder
 PORT = 8000
-DIRECTORY = "assets/videos"
+
+# This line is the magic fix. It finds the folder where app.py is saved.
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(BASE_DIR)
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=DIRECTORY, **kwargs)
+    def do_GET(self):
+        # 1. If asking for home page, force it to show index.html
+        if self.path == '/':
+            self.path = '/index.html'
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        
+        # 2. Check if the file exists in the main folder (like index.html)
+        if os.path.exists(self.path.lstrip('/')):
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        
+        # 3. If not found, look inside assets/videos
+        # This maps "500 Days of Summer.mp4" to "assets/videos/500 Days of Summer.mp4"
+        video_path = os.path.join('assets', 'videos', self.path.lstrip('/'))
+        if os.path.exists(video_path):
+            self.path = video_path
+            return http.server.SimpleHTTPRequestHandler.do_GET(self)
+        
+        return http.server.SimpleHTTPRequestHandler.do_GET(self)
 
 with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
-    print(f"OTT Server started at http://localhost:{PORT}")
-    print("Press Ctrl+C to stop.")
+    print(f"Server started at http://192.168.29.219:{PORT}")
     httpd.serve_forever()
