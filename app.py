@@ -1,38 +1,38 @@
 import http.server
 import socketserver
 import os
+from urllib.parse import unquote
 
 PORT = 8000
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 os.chdir(BASE_DIR)
 
 class MyHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        # This tells the browser it's okay to stream this data
+        self.send_header('Accept-Ranges', 'bytes')
+        super().end_headers()
+
     def do_GET(self):
-        # 1. If it's the home page
         if self.path == '/':
             self.path = '/index.html'
             return super().do_GET()
         
-        # 2. Check if the file is in the main folder
-        if os.path.exists(self.path.lstrip('/')):
-            return super().do_GET()
+        # Decode the URL (fixes spaces and special characters)
+        clean_path = unquote(self.path.lstrip('/'))
         
-        # 3. FIX: Look specifically inside assets/videos
-        # We manually build the path to the movie
-        clean_path = self.path.lstrip('/')
-        # We need to unquote the URL (e.g., %20 becomes a space)
-        from urllib.parse import unquote
-        video_file = unquote(clean_path)
+        # Check if it's a video file
+        if clean_path.endswith(('.mp4', '.mkv', '.webm')):
+            video_path = os.path.join(BASE_DIR, 'assets', 'videos', clean_path)
+            if os.path.exists(video_path):
+                self.path = f"/assets/videos/{clean_path}"
         
-        full_video_path = os.path.join(BASE_DIR, 'assets', 'videos', video_file)
-        
-        if os.path.exists(full_video_path):
-            # Tell Python: "Ignore the URL path, use THIS actual file path"
-            self.path = f"/assets/videos/{video_file}"
-            return super().do_GET()
-            
         return super().do_GET()
 
-with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
-    print(f"Server started at http://192.168.29.219:{PORT}")
+# Use a faster threading server to handle multiple "chunks" of video at once
+class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    pass
+
+with ThreadingHTTPServer(("", PORT), MyHandler) as httpd:
+    print(f"Streaming Server active at http://192.168.29.219:{PORT}")
     httpd.serve_forever()
